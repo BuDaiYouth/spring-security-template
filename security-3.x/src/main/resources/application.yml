@@ -1,0 +1,36 @@
+server:
+  port: 9090
+  servlet:
+    context-path: /securityTemplate
+
+spring:
+  # MySQL 数据库
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/test_db?useUnicode=true&characterEncoding=utf-8&useSSL=false
+    username: root
+    password: 123456
+
+# 认证配置
+auth:
+  host:
+    # deploy to server need config to "*"
+    cors: http://localhost:8080,http://127.0.0.1:8080
+  filter:
+    enabled: true
+    ignored: /api/auth/*
+    excludes: /api/auth/login
+  security:
+    ignore: /api/auth/register,/api/auth/forgot
+    login: /api/auth/verify
+    user: /api/user/**
+    admin: /api/admin/**
+    common: /api/free/**
+
+# 绑定 MyBatis
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: xyz.ibudai.security.common.entity
+  # 控制台打印 sql 语句
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

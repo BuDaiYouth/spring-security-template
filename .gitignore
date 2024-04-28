@@ -1,0 +1,41 @@
+# vscode
+.history
+.vscode
+
+# git
+*.orig
+
+# vue
+dist
+node_modules
+package-lock.json
+
+# IDEA
+.idea
+.mvn
+*.iml
+
+# Eclipse
+.classpath
+.project
+target
+.settings
+
+# vs code
+.history
+
+# compile
+*.class
+.DS_Store
+application.pid
+
+# Mobile Tools for Java
+.mtj.tmp/
+
+# Package Files
+*.jar
+*.war
+*.ear
+
+# virtual machine crash logs
+hs_err_pid*
