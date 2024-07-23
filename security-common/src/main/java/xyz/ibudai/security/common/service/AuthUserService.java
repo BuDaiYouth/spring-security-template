@@ -1,7 +1,6 @@
 package xyz.ibudai.security.common.service;
 
 import org.springframework.security.core.userdetails.UserDetailsService;
-import xyz.ibudai.security.common.entity.AuthUser;
 
 /**
  * (TbUser)表服务接口
@@ -11,5 +10,4 @@ import xyz.ibudai.security.common.entity.AuthUser;
  */
 public interface AuthUserService extends UserDetailsService {
 
-    boolean login(AuthUser user) throws Exception;
 }

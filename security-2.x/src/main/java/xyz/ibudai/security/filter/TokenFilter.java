@@ -6,7 +6,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import xyz.ibudai.security.common.entity.common.ResultData;
+import xyz.ibudai.security.common.model.common.ResultData;
+import xyz.ibudai.security.common.model.enums.ContentType;
+import xyz.ibudai.security.common.model.enums.ResStatus;
 import xyz.ibudai.security.common.util.TokenUtil;
 
 import javax.servlet.*;
@@ -24,41 +26,31 @@ public class TokenFilter implements Filter {
     private ObjectMapper objectMapper;
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
-        Filter.super.init(filterConfig);
-    }
-
-    @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) servletRequest;
         if (!enabledFilter) {
             filterChain.doFilter(req, servletResponse);
             return;
         }
-
-        boolean isAuth = true;
         String token = req.getHeader("Token");
-        if (StringUtils.isNotBlank(token)) {
-            try {
-                TokenUtil.parseJWT(token);
-            } catch (ExpiredJwtException e) {
-                isAuth = false;
-            }
-            if (isAuth) {
-                filterChain.doFilter(req, servletResponse);
-            }
-        } else {
+        if (StringUtils.isBlank(token)) {
+            ResStatus resStatus = ResStatus.NOT_LOGIN;
             HttpServletResponse response = (HttpServletResponse) servletResponse;
-            response.setContentType("application/json;charset=UTF-8");
-            response.setStatus(203);
-            String msg = "Request illegal, please authentication";
-            ResultData<Object> result = new ResultData<>(203, msg, null);
+            response.setContentType(ContentType.JSON.value());
+            response.setStatus(resStatus.code());
+            ResultData<Object> result = new ResultData<>(resStatus.code(), resStatus.message(), null);
             response.getWriter().write(objectMapper.writeValueAsString(result));
+            return;
         }
-    }
 
-    @Override
-    public void destroy() {
-        Filter.super.destroy();
+        boolean expired = false;
+        try {
+            TokenUtil.parseJWT(token);
+        } catch (ExpiredJwtException e) {
+            expired = true;
+        }
+        if (!expired) {
+            filterChain.doFilter(req, servletResponse);
+        }
     }
 }

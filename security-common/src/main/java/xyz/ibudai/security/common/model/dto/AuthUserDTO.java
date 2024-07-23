@@ -1,4 +1,4 @@
-package xyz.ibudai.security.common.entity.dto;
+package xyz.ibudai.security.common.model.dto;
 
 import lombok.Data;
 

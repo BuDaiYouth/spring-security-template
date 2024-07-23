@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import xyz.ibudai.security.filter.TokenFilter;
 
 import java.util.Arrays;
@@ -35,7 +36,7 @@ public class FilterConfig {
             }
         }
         filter.addInitParameter("excludedUris", StringUtils.join(urls, ","));
-        filter.setOrder(-1);
+        filter.setOrder(Ordered.HIGHEST_PRECEDENCE);
         filter.setFilter(new TokenFilter());
         return filter;
     }

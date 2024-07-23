@@ -1,4 +1,4 @@
-package xyz.ibudai.security.common.entity;
+package xyz.ibudai.security.common.model.vo;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

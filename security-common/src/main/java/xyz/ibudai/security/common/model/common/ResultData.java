@@ -1,4 +1,4 @@
-package xyz.ibudai.security.common.entity.common;
+package xyz.ibudai.security.common.model.common;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

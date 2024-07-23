@@ -1,13 +1,13 @@
 server:
-  port: 9090
+  port: 9091
   servlet:
-    context-path: /securityTemplate
+    context-path: /security3Template
 
 spring:
   # MySQL 数据库
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/test_db?useUnicode=true&characterEncoding=utf-8&useSSL=false
+    url: jdbc:mysql://192.168.0.21:3306/db_security?useUnicode=true&characterEncoding=utf-8&useSSL=false
     username: root
     password: 123456
 
@@ -18,14 +18,13 @@ auth:
     cors: http://localhost:8080,http://127.0.0.1:8080
   filter:
     enabled: true
-    ignored: /api/auth/*
-    excludes: /api/auth/login
+    excludes: /api/auth/*
   security:
-    ignore: /api/auth/register,/api/auth/forgot
-    login: /api/auth/verify
-    user: /api/user/**
-    admin: /api/admin/**
-    common: /api/free/**
+    loginUrl: /api/auth/login
+    whitelist: /api/auth/register,/api/auth/forgot
+    userUrls: /api/user/**
+    adminUrls: /api/admin/**
+    commonUrls: /api/free/**
 
 # 绑定 MyBatis
 mybatis:

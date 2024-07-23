@@ -2,26 +2,29 @@
 server:
   port: 9090
   servlet:
-    context-path: /securityTemplate
+    context-path: /security2Template
 
 # Security auth
 auth:
   host:
     cors: http://localhost:8080,http://127.0.0.1:8080
+  # 过滤器配置
   filter:
     enabled: false
     excludes: /api/auth/**
+  # 接口认证配置
   security:
-    verify: /api/auth/verify
-    user: /api/resource/user/**
-    admin: /api/resource/admin/**
-    common: /api/auth/verify
+    loginUrl: /api/auth/login
+    whitelist: /api/auth/register,/api/auth/forgot
+    userUrls: /api/user/**
+    adminUrls: /api/admin/**
+    commonUrls: /api/free/**
 
 spring:
   # MySQL 数据库
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/test_db?useUnicode=true&characterEncoding=utf-8&useSSL=false
+    url: jdbc:mysql://192.168.0.21:3306/db_security?useUnicode=true&characterEncoding=utf-8&useSSL=false
     username: root
     password: 123456
     # 阿里连接池配置

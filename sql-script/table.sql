@@ -1,3 +1,5 @@
+CREATE DATABASE `db_security`
+
 CREATE TABLE `auth_user`
 (
     `id`                      varchar(36) NOT NULL,

@@ -3,6 +3,7 @@ package xyz.ibudai.security.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.*;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -19,9 +21,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import xyz.ibudai.security.common.entity.AuthUser;
-import xyz.ibudai.security.common.entity.common.ResultData;
-import xyz.ibudai.security.common.entity.dto.AuthUserDTO;
+import xyz.ibudai.security.common.model.enums.ContentType;
+import xyz.ibudai.security.common.model.enums.ResStatus;
+import xyz.ibudai.security.common.model.props.SecurityProps;
+import xyz.ibudai.security.common.model.vo.AuthUser;
+import xyz.ibudai.security.common.model.common.ResultData;
+import xyz.ibudai.security.common.model.common.SecurityConst;
+import xyz.ibudai.security.common.model.dto.AuthUserDTO;
 import xyz.ibudai.security.common.service.AuthUserService;
 import xyz.ibudai.security.common.util.AESUtil;
 import xyz.ibudai.security.common.util.TokenUtil;
@@ -34,30 +40,19 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Configuration
+// @EnableGlobalMethodSecurity 在 Security3 中已弃用
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Value("${server.servlet.context-path}")
     private String contextPath;
 
-    @Value("${auth.security.ignore}")
-    private String ignoredAPI;
-
-    @Value("${auth.security.login}")
-    private String loginAPI;
-
-    @Value("${auth.security.common}")
-    private String commonAPIs;
-
-    @Value("${auth.security.user}")
-    private String userAPIs;
-
-    @Value("${auth.security.admin}")
-    private String adminAPIs;
-
+    @Autowired
+    private SecurityProps securityProps;
     @Autowired
     private ObjectMapper objectMapper;
-
     @Autowired
     private AuthUserService authUserService;
 
@@ -87,65 +82,39 @@ public class SecurityConfig {
      */
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        String[] ignoredApis = ignoredAPI.split(",");
-        return (web) -> web.ignoring()
-                .requestMatchers(ignoredApis);
+        String[] whitelist = this.appendPrefix(securityProps.getWhitelist());
+        return (web) -> web.ignoring().requestMatchers(whitelist);
     }
 
     /**
      * Security 3.x 通过注入 SecurityFilterChain 对象配置规则
+     * <p>
      * Security 2.x 通过继承 WebSecurityConfigurerAdapter 并重写 configure(HttpSecurity) 实现
      */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         // 解析配置接口名单
-        String[] userUrls = userAPIs.trim().split(",");
-        String[] adminUrls = adminAPIs.trim().split(",");
-        String[] commonUrls = commonAPIs.trim().split(",");
-        if (!StringUtils.isBlank(contextPath)) {
-            if (commonUrls.length > 0) {
-                commonUrls = Arrays.stream(commonUrls)
-                        .map(it -> contextPath + it)
-                        .toArray(String[]::new);
-            }
-            if (userUrls.length > 0) {
-                userUrls = Arrays.stream(userUrls)
-                        .map(it -> contextPath + it)
-                        .toArray(String[]::new);
-            }
-            if (adminUrls.length > 0) {
-                adminUrls = Arrays.stream(adminUrls)
-                        .map(it -> contextPath + it)
-                        .toArray(String[]::new);
-            }
-        }
+        String[] userResource = this.appendPrefix(securityProps.getUserUrls());
+        final String[] adminResource = this.appendPrefix(securityProps.getAdminUrls());
+        final String[] commonResource = this.appendPrefix(securityProps.getCommonUrls());
 
         // 配置 security 作用规则
-        final String[] userResource = userUrls;
-        final String[] adminResource = adminUrls;
-        final String[] commonResource = commonUrls;
-        http
-                .authorizeHttpRequests(auth -> {
-                    auth
-                            // 为不同权限分配不同资源
-                            .requestMatchers(userResource).hasRole("USER")
-                            .requestMatchers(adminResource).hasRole("ADMIN")
+        http.authorizeHttpRequests(auth -> {
+                    // 为不同权限分配不同资源
+                    auth.requestMatchers(userResource).hasRole(SecurityConst.ROLE_USER)
+                            .requestMatchers(adminResource).hasRole(SecurityConst.ROLE_ADMIN)
                             // permitAll(): 任意角色都可访问
                             .requestMatchers(commonResource).permitAll()
                             // 默认无定义资源都需认证
                             .anyRequest().authenticated();
-                })
-                .httpBasic(Customizer.withDefaults())
-                .formLogin(form -> {
+                }).httpBasic(Customizer.withDefaults()).formLogin(form -> {
                     // 配置登录接口
-                    form.loginProcessingUrl(loginAPI).permitAll()
+                    form.loginProcessingUrl(securityProps.getLoginUrl().trim()).permitAll()
                             // 登录成功处理逻辑
                             .successHandler(this::successHandle)
                             // 登录失败处理逻辑
                             .failureHandler(this::failureHandle);
-                })
-                .logout(LogoutConfigurer::permitAll)
-                .exceptionHandling(handle -> {
+                }).logout(LogoutConfigurer::permitAll).exceptionHandling(handle -> {
                     // 无认证异常处理逻辑
                     handle.authenticationEntryPoint(this::unAuthHandle);
                 })
@@ -156,6 +125,25 @@ public class SecurityConfig {
                 // 允许跨域
                 .cors(Customizer.withDefaults());
         return http.build();
+    }
+
+    /**
+     * 资源拆分拼接
+     *
+     * @param url 资源路径
+     */
+    private String[] appendPrefix(String url) {
+        if (StringUtils.isBlank(url)) {
+            throw new IllegalArgumentException("Url resource can't be blank!");
+        }
+
+        String[] urls = url.trim().split(",");
+        if (urls.length > 0) {
+            urls = Arrays.stream(urls)
+                    .map(it -> contextPath + it)
+                    .toArray(String[]::new);
+        }
+        return urls;
     }
 
     /**
@@ -178,31 +166,33 @@ public class SecurityConfig {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+
         // 将 Token 写入响应的请求头返回
         response.addHeader("token", token);
         String auth = user.getUsername() + ":" + user.getPassword();
         response.addHeader("auth", Base64.getEncoder().encodeToString(auth.getBytes()));
-        response.setContentType("application/json;charset=UTF-8");
-        ResultData<Object> result = new ResultData<>(200, "login success.", true);
+        response.setContentType(ContentType.JSON.value());
+        ResultData<Object> result = new ResultData<>(ResStatus.SUCCESS.code(), ResStatus.SUCCESS.message(), true);
         response.getWriter().write(objectMapper.writeValueAsString(result));
     }
 
     /**
      * 认证登录失败处理
+     * <p>
+     * 有认证信息但验证不通过，根据对应类型进行提示
      */
     private void failureHandle(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
-        String msg;
-        // 有认证信息但验证不通过，根据对应类型进行提示
+        ResStatus resStatus;
         if (exception instanceof LockedException) {
-            msg = "Account has been locked, please contact the administrator.";
+            resStatus = ResStatus.ACCOUNT_LOCK;
         } else if (exception instanceof BadCredentialsException) {
-            msg = "Account credential error, please recheck.";
+            resStatus = ResStatus.BAD_CREDENTIAL;
         } else {
-            msg = "Account doesn't exist, please recheck.";
+            resStatus = ResStatus.NOT_EXISTED;
         }
-        response.setContentType("application/json;charset=UTF-8");
-        response.setStatus(203);
-        ResultData<Object> result = new ResultData<>(203, msg, null);
+        response.setContentType(ContentType.JSON.value());
+        response.setStatus(resStatus.code());
+        ResultData<Object> result = new ResultData<>(resStatus.code(), resStatus.message(), null);
         response.getWriter().write(objectMapper.writeValueAsString(result));
     }
 
@@ -210,11 +200,12 @@ public class SecurityConfig {
      * 未认证访问资源处理
      */
     private void unAuthHandle(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
-        // 无认证信息则提示进行登录
-        String msg = "Authorization failure, please login and try again.";
-        response.setContentType("application/json;charset=UTF-8");
-        response.setStatus(203);
-        ResultData<Object> result = new ResultData<>(203, msg, null);
+        response.setContentType(ContentType.JSON.value());
+
+        ResStatus unAuth = ResStatus.UN_AUTHENTIC;
+        log.error("Code: {}, Message: {}", unAuth.code(), unAuth.message());
+        response.setStatus(unAuth.code());
+        ResultData<Object> result = new ResultData<>(unAuth.code(), unAuth.message(), null);
         response.getWriter().write(objectMapper.writeValueAsString(result));
     }
 }
