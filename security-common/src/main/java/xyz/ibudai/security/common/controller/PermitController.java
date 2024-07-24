@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class PermitController {
 
     @GetMapping("demo")
-    @PreAuthorize("@ph.isPermit('admin')")
+    @PreAuthorize("@ph.isPermit('ADMIN')")
     public void demo() {
         System.out.println("Permit demo");
     }

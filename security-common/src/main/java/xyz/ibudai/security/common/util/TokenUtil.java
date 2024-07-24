@@ -20,22 +20,6 @@ public class TokenUtil {
      */
     public static final Long JWT_TTL = TimeUnit.MINUTES.toMillis(5);
 
-    public static void main(String[] args) throws Exception {
-        String userId = "user";
-        String token = createJWT(userId, JWT_TTL);
-        System.out.println("Token value: " + token);
-
-        TimeUnit.MILLISECONDS.sleep(1);
-        try {
-            // Recover token
-            Claims claims = parseJWT(token);
-            String data = (String) claims.get("sub");
-            System.out.println("Data: " + data);
-        } catch (ExpiredJwtException e) {
-            System.out.println("User is expired.");
-        }
-    }
-
     /**
      * 生成 Token
      *
@@ -55,10 +39,7 @@ public class TokenUtil {
      */
     public static Claims parseJWT(String token) {
         SecretKey secretKey = generalKey();
-        return Jwts.parser()
-                .setSigningKey(secretKey)
-                .parseClaimsJws(token)
-                .getBody();
+        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
     }
 
     /**
@@ -75,6 +56,7 @@ public class TokenUtil {
         long nowMillis = System.currentTimeMillis();
         Date now = new Date(nowMillis);
         if (ttlMillis == null) {
+            // default expire time 5 minute
             ttlMillis = JWT_TTL;
         }
         long expMillis = nowMillis + ttlMillis;

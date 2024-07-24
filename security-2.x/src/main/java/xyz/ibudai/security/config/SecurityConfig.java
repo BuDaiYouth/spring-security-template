@@ -156,7 +156,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private void unAuthHandle(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
         response.setContentType(ContentType.JSON.value());
 
-        ResStatus unAuth = ResStatus.UN_AUTHENTIC;
+        ResStatus unAuth = ResStatus.NOT_AUTHENTIC;
         log.error("Code: {}, Message: {}", unAuth.code(), unAuth.message());
         response.setStatus(unAuth.code());
         ResultData<Object> result = new ResultData<>(unAuth.code(), unAuth.message(), null);

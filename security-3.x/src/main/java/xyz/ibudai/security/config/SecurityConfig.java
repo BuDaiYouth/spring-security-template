@@ -22,6 +22,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import xyz.ibudai.security.common.model.enums.ContentType;
+import xyz.ibudai.security.common.model.enums.ReqHeader;
 import xyz.ibudai.security.common.model.enums.ResStatus;
 import xyz.ibudai.security.common.model.props.SecurityProps;
 import xyz.ibudai.security.common.model.vo.AuthUser;
@@ -29,10 +30,9 @@ import xyz.ibudai.security.common.model.common.ResultData;
 import xyz.ibudai.security.common.model.common.SecurityConst;
 import xyz.ibudai.security.common.model.dto.AuthUserDTO;
 import xyz.ibudai.security.common.service.AuthUserService;
-import xyz.ibudai.security.common.util.AESUtil;
 import xyz.ibudai.security.common.util.TokenUtil;
 import xyz.ibudai.security.common.encrypt.AESEncoder;
-import xyz.ibudai.security.filter.TokenFilter;
+import xyz.ibudai.security.filter.RequestFilter;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -50,31 +50,38 @@ public class SecurityConfig {
     private String contextPath;
 
     @Autowired
-    private SecurityProps securityProps;
-    @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private SecurityProps securityProps;
     @Autowired
     private AuthUserService authUserService;
 
     /**
-     * Security 3.x: authenticationManager() + authenticationProvider()
-     * <p>
      * Security 2.x: configure(AuthenticationManagerBuilder auth)
+     * <p>
+     * Security 3.x: authenticationManager() + authenticationProvider()
      */
     @Bean
     protected AuthenticationManager authenticationManager() {
         return new ProviderManager(Collections.singletonList(authenticationProvider()));
     }
 
+    /**
+     * 创建用户认证提供者
+     */
     @Bean
     public AuthenticationProvider authenticationProvider() {
-        // 创建一个用户认证提供者
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         // 设置动态用户信息
         authProvider.setUserDetailsService(authUserService);
         // 设置加密机制
         authProvider.setPasswordEncoder(new AESEncoder());
         return authProvider;
+    }
+
+    @Bean
+    public RequestFilter requestFilter() {
+        return new RequestFilter();
     }
 
     /**
@@ -92,7 +99,7 @@ public class SecurityConfig {
      * Security 2.x 通过继承 WebSecurityConfigurerAdapter 并重写 configure(HttpSecurity) 实现
      */
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         // 解析配置接口名单
         String[] userResource = this.appendPrefix(securityProps.getUserUrls());
         final String[] adminResource = this.appendPrefix(securityProps.getAdminUrls());
@@ -107,19 +114,24 @@ public class SecurityConfig {
                             .requestMatchers(commonResource).permitAll()
                             // 默认无定义资源都需认证
                             .anyRequest().authenticated();
-                }).httpBasic(Customizer.withDefaults()).formLogin(form -> {
-                    // 配置登录接口
+                })
+                .httpBasic(Customizer.withDefaults())
+                // 配置登录接口
+                .formLogin(form -> {
                     form.loginProcessingUrl(securityProps.getLoginUrl().trim()).permitAll()
                             // 登录成功处理逻辑
-                            .successHandler(this::successHandle)
+                            .successHandler(this::loginSuccessHandle)
                             // 登录失败处理逻辑
-                            .failureHandler(this::failureHandle);
-                }).logout(LogoutConfigurer::permitAll).exceptionHandling(handle -> {
-                    // 无认证异常处理逻辑
+                            .failureHandler(this::loginFailureHandle);
+                })
+                // 登出逻辑
+                .logout(LogoutConfigurer::permitAll)
+                // 无认证异常处理逻辑
+                .exceptionHandling(handle -> {
                     handle.authenticationEntryPoint(this::unAuthHandle);
                 })
-                // 设置拦截器，同理还有 addFilterBefore()
-                .addFilterAfter(new TokenFilter(), UsernamePasswordAuthenticationFilter.class)
+                // 设置拦截器
+                .addFilterBefore(requestFilter(), UsernamePasswordAuthenticationFilter.class)
                 // 关闭跨站攻击
                 .csrf(AbstractHttpConfigurer::disable)
                 // 允许跨域
@@ -134,14 +146,12 @@ public class SecurityConfig {
      */
     private String[] appendPrefix(String url) {
         if (StringUtils.isBlank(url)) {
-            throw new IllegalArgumentException("Url resource can't be blank!");
+            throw new IllegalArgumentException("Resource can't be blank!");
         }
 
         String[] urls = url.trim().split(",");
         if (urls.length > 0) {
-            urls = Arrays.stream(urls)
-                    .map(it -> contextPath + it)
-                    .toArray(String[]::new);
+            urls = Arrays.stream(urls).map(it -> contextPath + it).toArray(String[]::new);
         }
         return urls;
     }
@@ -149,30 +159,32 @@ public class SecurityConfig {
     /**
      * 认证登录成功处理
      * <p>
-     * Request Head: Authorization = Basic xxx(auth)
+     * getPrincipal() 返回结果为下述方法执行结果
+     * {@link xyz.ibudai.security.common.service.Impl.AuthUserServiceImpl#loadUserByUsername(java.lang.String)}
+     * <p>
+     * Request Head:
      */
-    private void successHandle(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
+    private void loginSuccessHandle(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         AuthUser user = (AuthUser) authentication.getPrincipal();
-        String token, plainPwd;
         try {
             AuthUserDTO userDTO = new AuthUserDTO();
-            plainPwd = AESUtil.desEncrypt(user.getPassword()).trim();
             userDTO.setUsername(user.getUsername());
-            userDTO.setPassword(plainPwd);
+            userDTO.setPassword(user.getPassword());
             userDTO.setRole(user.getRole());
-            // 验证成功为用户生成过期时间为 12 小时的 Token
+            // 验证成功为用户生成 30 分钟的 Token
             String key = objectMapper.writeValueAsString(userDTO);
-            token = TokenUtil.createJWT(key, TimeUnit.HOURS.toMillis(12));
+            String token = TokenUtil.createJWT(key, TimeUnit.MINUTES.toMillis(30));
+            response.addHeader(ReqHeader.BACK_TOKEN.value(), token);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
-        // 将 Token 写入响应的请求头返回
-        response.addHeader("token", token);
+        // Authorization = Bearer xxx
         String auth = user.getUsername() + ":" + user.getPassword();
-        response.addHeader("auth", Base64.getEncoder().encodeToString(auth.getBytes()));
+        auth = Base64.getEncoder().encodeToString(auth.getBytes());
+        response.addHeader(ReqHeader.BACK_AUTH.value(), auth);
         response.setContentType(ContentType.JSON.value());
-        ResultData<Object> result = new ResultData<>(ResStatus.SUCCESS.code(), ResStatus.SUCCESS.message(), true);
+        ResultData<Object> result = new ResultData<>(ResStatus.SUCCESS.code(), ResStatus.SUCCESS.message(), auth);
         response.getWriter().write(objectMapper.writeValueAsString(result));
     }
 
@@ -181,7 +193,7 @@ public class SecurityConfig {
      * <p>
      * 有认证信息但验证不通过，根据对应类型进行提示
      */
-    private void failureHandle(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
+    private void loginFailureHandle(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
         ResStatus resStatus;
         if (exception instanceof LockedException) {
             resStatus = ResStatus.ACCOUNT_LOCK;
@@ -200,10 +212,10 @@ public class SecurityConfig {
      * 未认证访问资源处理
      */
     private void unAuthHandle(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
-        response.setContentType(ContentType.JSON.value());
+        log.error("The request is not authentic");
 
-        ResStatus unAuth = ResStatus.UN_AUTHENTIC;
-        log.error("Code: {}, Message: {}", unAuth.code(), unAuth.message());
+        response.setContentType(ContentType.JSON.value());
+        ResStatus unAuth = ResStatus.NOT_AUTHENTIC;
         response.setStatus(unAuth.code());
         ResultData<Object> result = new ResultData<>(unAuth.code(), unAuth.message(), null);
         response.getWriter().write(objectMapper.writeValueAsString(result));
