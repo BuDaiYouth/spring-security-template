@@ -18,13 +18,13 @@ auth:
     cors: http://localhost:8080,http://127.0.0.1:8080
   filter:
     enabled: true
-    whitelist: /api/auth/*
+    whitelist: /api/sys/*,/api/auth/whitelist/*,/api/auth/ignored/*
   security:
-    loginUrl: /api/auth/login
-    whitelist: /api/auth/register,/api/auth/forgot
-    userUrls: /api/user/**
-    adminUrls: /api/admin/**
-    commonUrls: /api/free/**
+    loginUrl: /api/sys/login
+    ignoreUrls: /api/auth/ignored/*
+    whitelist: /api/sys/*,/api/auth/whitelist/*
+    userUrls: /api/auth/user/*
+    adminUrls: /api/auth/admin/*
 
 # 绑定 MyBatis
 mybatis:

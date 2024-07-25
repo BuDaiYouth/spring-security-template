@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import xyz.ibudai.security.common.model.common.ResultData;
 import xyz.ibudai.security.common.model.enums.ContentType;
+import xyz.ibudai.security.common.model.enums.ReqHeader;
 import xyz.ibudai.security.common.model.enums.ResStatus;
 import xyz.ibudai.security.common.util.TokenUtil;
 
@@ -32,7 +33,7 @@ public class TokenFilter implements Filter {
             filterChain.doFilter(req, servletResponse);
             return;
         }
-        String token = req.getHeader("Token");
+        String token = req.getHeader(ReqHeader.FRONT_TOKEN.value());
         if (StringUtils.isBlank(token)) {
             ResStatus resStatus = ResStatus.NOT_LOGIN;
             HttpServletResponse response = (HttpServletResponse) servletResponse;

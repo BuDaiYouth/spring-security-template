@@ -11,11 +11,11 @@ public class SecurityProps {
 
     private String loginUrl;
 
+    private String ignoreUrls;
+
     private String whitelist;
 
     private String userUrls;
 
     private String adminUrls;
-
-    private String commonUrls;
 }

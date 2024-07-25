@@ -6,7 +6,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.*;
@@ -35,9 +34,10 @@ import xyz.ibudai.security.common.encrypt.AESEncoder;
 import xyz.ibudai.security.filter.RequestFilter;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -45,9 +45,6 @@ import java.util.concurrent.TimeUnit;
 // @EnableGlobalMethodSecurity 在 Security3 中已弃用
 @EnableMethodSecurity
 public class SecurityConfig {
-
-    @Value("${server.servlet.context-path}")
-    private String contextPath;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -89,8 +86,8 @@ public class SecurityConfig {
      */
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        String[] whitelist = this.appendPrefix(securityProps.getWhitelist());
-        return (web) -> web.ignoring().requestMatchers(whitelist);
+        String[] ignoredResource = this.appendPrefix(securityProps.getIgnoreUrls());
+        return (web) -> web.ignoring().requestMatchers(ignoredResource);
     }
 
     /**
@@ -101,9 +98,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         // 解析配置接口名单
-        String[] userResource = this.appendPrefix(securityProps.getUserUrls());
+        final String[] userResource = this.appendPrefix(securityProps.getUserUrls());
         final String[] adminResource = this.appendPrefix(securityProps.getAdminUrls());
-        final String[] commonResource = this.appendPrefix(securityProps.getCommonUrls());
+        final String[] whitelistResource = this.appendPrefix(securityProps.getWhitelist());
 
         // 配置 security 作用规则
         http.authorizeHttpRequests(auth -> {
@@ -111,7 +108,7 @@ public class SecurityConfig {
                     auth.requestMatchers(userResource).hasRole(SecurityConst.ROLE_USER)
                             .requestMatchers(adminResource).hasRole(SecurityConst.ROLE_ADMIN)
                             // permitAll(): 任意角色都可访问
-                            .requestMatchers(commonResource).permitAll()
+                            .requestMatchers(whitelistResource).permitAll()
                             // 默认无定义资源都需认证
                             .anyRequest().authenticated();
                 })
@@ -149,11 +146,7 @@ public class SecurityConfig {
             throw new IllegalArgumentException("Resource can't be blank!");
         }
 
-        String[] urls = url.trim().split(",");
-        if (urls.length > 0) {
-            urls = Arrays.stream(urls).map(it -> contextPath + it).toArray(String[]::new);
-        }
-        return urls;
+        return url.trim().split(",");
     }
 
     /**
@@ -166,6 +159,7 @@ public class SecurityConfig {
      */
     private void loginSuccessHandle(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         AuthUser user = (AuthUser) authentication.getPrincipal();
+        String token;
         try {
             AuthUserDTO userDTO = new AuthUserDTO();
             userDTO.setUsername(user.getUsername());
@@ -173,7 +167,7 @@ public class SecurityConfig {
             userDTO.setRole(user.getRole());
             // 验证成功为用户生成 30 分钟的 Token
             String key = objectMapper.writeValueAsString(userDTO);
-            String token = TokenUtil.createJWT(key, TimeUnit.MINUTES.toMillis(30));
+            token = TokenUtil.createJWT(key, TimeUnit.MINUTES.toMillis(30));
             response.addHeader(ReqHeader.BACK_TOKEN.value(), token);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -184,7 +178,10 @@ public class SecurityConfig {
         auth = Base64.getEncoder().encodeToString(auth.getBytes());
         response.addHeader(ReqHeader.BACK_AUTH.value(), auth);
         response.setContentType(ContentType.JSON.value());
-        ResultData<Object> result = new ResultData<>(ResStatus.SUCCESS.code(), ResStatus.SUCCESS.message(), auth);
+        Map<String, String> value = new HashMap<>();
+        value.put(ReqHeader.BACK_AUTH.value(), auth);
+        value.put(ReqHeader.BACK_TOKEN.value(), token);
+        ResultData<Object> result = new ResultData<>(ResStatus.SUCCESS.code(), ResStatus.SUCCESS.message(), value);
         response.getWriter().write(objectMapper.writeValueAsString(result));
     }
 

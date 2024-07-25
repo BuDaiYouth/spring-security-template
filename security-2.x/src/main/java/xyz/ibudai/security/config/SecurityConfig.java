@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
@@ -29,7 +28,6 @@ import xyz.ibudai.security.common.encrypt.AESEncoder;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 
@@ -37,9 +35,6 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-
-    @Value("${server.servlet.context-path}")
-    private String contextPath;
 
     @Autowired
     private SecurityProps securityProps;
@@ -64,13 +59,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         String[] userResource = this.appendPrefix(securityProps.getUserUrls());
         String[] adminResource = this.appendPrefix(securityProps.getAdminUrls());
-        String[] commonResource = this.appendPrefix(securityProps.getCommonUrls());
+        String[] whitelistResource = this.appendPrefix(securityProps.getWhitelist());
         http.authorizeRequests()
                 // 为不同权限分配不同资源
                 .antMatchers(userResource).hasAnyRole(SecurityConst.ROLE_USER)
                 .antMatchers(adminResource).hasAnyRole(SecurityConst.ROLE_ADMIN)
                 // 设置通用资源
-                .antMatchers(commonResource).permitAll()
+                .antMatchers(whitelistResource).permitAll()
                 // 默认无定义资源都需认证
                 .anyRequest().authenticated()
                 // 自定义认证访问资源
@@ -98,13 +93,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             throw new IllegalArgumentException("Url resource can't be blank!");
         }
 
-        String[] urls = url.trim().split(",");
-        if (urls.length > 0) {
-            urls = Arrays.stream(urls)
-                    .map(it -> contextPath + it.trim())
-                    .toArray(String[]::new);
-        }
-        return urls;
+        return url.trim().split(",");
     }
 
     /**

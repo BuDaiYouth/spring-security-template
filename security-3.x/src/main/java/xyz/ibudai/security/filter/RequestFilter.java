@@ -14,8 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.util.PathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 import xyz.ibudai.security.common.model.common.ResultData;
 import xyz.ibudai.security.common.model.enums.ContentType;
@@ -44,7 +44,7 @@ public class RequestFilter extends OncePerRequestFilter {
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
-    private AntPathMatcher pathMatcher;
+    private AntPathMatcher antPathMatcher;
 
 
     @Override
@@ -87,8 +87,13 @@ public class RequestFilter extends OncePerRequestFilter {
         response.getWriter().write(objectMapper.writeValueAsString(result));
     }
 
+    /**
+     * 缓存信息至上下文
+     *
+     * @param authUser 登录用户
+     */
     private void fillAuthentic(AuthUser authUser) {
-        Authentication auth = new UsernamePasswordAuthenticationToken(authUser, null);
+        Authentication auth = new UsernamePasswordAuthenticationToken(authUser, null, authUser.getAuthorities());
         SecurityUtils.setAuthentication(auth);
     }
 
@@ -103,12 +108,12 @@ public class RequestFilter extends OncePerRequestFilter {
             String[] excludesResource = whitelistUrl.split(",");
             if (!StringUtils.isBlank(contextPath) && excludesResource.length > 0) {
                 excludesResource = Arrays.stream(excludesResource)
-                        .map(it -> contextPath + it)
+                        .map(it -> contextPath + it.trim())
                         .toArray(String[]::new);
             }
 
             for (String pattern : excludesResource) {
-                if (pathMatcher.match(pattern, path)) {
+                if (antPathMatcher.match(pattern, path)) {
                     isMarch = true;
                     break;
                 }
@@ -117,5 +122,10 @@ public class RequestFilter extends OncePerRequestFilter {
             log.error("Verify path failed", e);
         }
         return isMarch;
+    }
+
+    public static void main(String[] args) {
+        AntPathMatcher pathMatcher = new AntPathMatcher();
+        System.out.println(pathMatcher.match("/api/sys/**", "/api/sys/hello"));
     }
 }
