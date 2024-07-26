@@ -2,7 +2,8 @@ package xyz.ibudai.security.common.model.enums;
 
 public enum ResStatus {
 
-    SUCCESS(200, "Login success."),
+    LOGIN_SUCCESS(200, "Login success."),
+    LOGOUT_SUCCESS(200, "Logout success."),
     ACCOUNT_LOCK(201, "Account locked, please contact the administrator."),
     BAD_CREDENTIAL(202, "Credential error, please recheck."),
     NOT_EXISTED(203, "Account doesn't exist, please register."),

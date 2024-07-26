@@ -11,6 +11,10 @@ public class SecurityProps {
 
     private String loginUrl;
 
+    private String logoutUrl;
+
+    private String logoutSuccessUrl;
+
     private String ignoreUrls;
 
     private String whitelist;

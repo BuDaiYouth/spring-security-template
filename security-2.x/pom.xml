@@ -17,6 +17,7 @@
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
 
+        <security-template.version>1.0.0-SNAPSHOT</security-template.version>
         <mybatis-spring.version>2.1.1</mybatis-spring.version>
     </properties>
 
@@ -40,13 +41,12 @@
         <dependency>
             <groupId>xyz.ibudai</groupId>
             <artifactId>security-common</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>${security-template.version}</version>
         </dependency>
-
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>${commons-lang3.version}</version>
+            <groupId>xyz.ibudai</groupId>
+            <artifactId>security-api</artifactId>
+            <version>${security-template.version}</version>
         </dependency>
     </dependencies>
 

@@ -12,6 +12,8 @@
     <artifactId>security-3.x</artifactId>
 
     <properties>
+        <security-template.version>1.0.0-SNAPSHOT</security-template.version>
+        <!-- Tool  -->
         <mybatis-spring.version>3.0.0</mybatis-spring.version>
         <commons-lang3.version>3.12.0</commons-lang3.version>
     </properties>
@@ -20,10 +22,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
         </dependency>
         <!-- Security -->
         <dependency>
@@ -41,13 +39,12 @@
         <dependency>
             <groupId>xyz.ibudai</groupId>
             <artifactId>security-common</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>${security-template.version}</version>
         </dependency>
-
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>${commons-lang3.version}</version>
+            <groupId>xyz.ibudai</groupId>
+            <artifactId>security-api</artifactId>
+            <version>${security-template.version}</version>
         </dependency>
     </dependencies>
 

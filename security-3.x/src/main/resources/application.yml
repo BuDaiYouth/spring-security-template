@@ -13,6 +13,9 @@ spring:
 
 # 认证配置
 auth:
+  expire:
+    # Timeunit: minute
+    jwt: 30
   host:
     # deploy to server need config to "*"
     cors: http://localhost:8080,http://127.0.0.1:8080
@@ -21,8 +24,10 @@ auth:
     whitelist: /api/sys/*,/api/auth/whitelist/*,/api/auth/ignored/*
   security:
     loginUrl: /api/sys/login
+    logoutUrl: /api/sys/logout
+    logoutSuccessUrl: /api/sys/logout?success
     ignoreUrls: /api/auth/ignored/*
-    whitelist: /api/sys/*,/api/auth/whitelist/*
+    whitelist: /api/sys/**,/api/auth/whitelist/*
     userUrls: /api/auth/user/*
     adminUrls: /api/auth/admin/*
 
