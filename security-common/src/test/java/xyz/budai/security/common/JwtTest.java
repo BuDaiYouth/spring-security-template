@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import xyz.ibudai.security.common.model.vo.AuthUser;
-import xyz.ibudai.security.common.util.TokenUtil;
+import xyz.ibudai.security.common.util.TokenUtils;
 
 public class JwtTest {
 
@@ -16,12 +16,12 @@ public class JwtTest {
         authUser.setPassword("1234");
         authUser.setRole("ADMIN");
 
-        String token = TokenUtil.createJWT(mapper.writeValueAsString(authUser), TokenUtil.JWT_TTL);
+        String token = TokenUtils.createJWT(mapper.writeValueAsString(authUser), TokenUtils.JWT_TTL);
         System.out.println("Token value: " + token);
 
         try {
             // Recover token
-            Claims claims = TokenUtil.parseJWT(token);
+            Claims claims = TokenUtils.parseJWT(token);
             String data = (String) claims.get("sub");
             System.out.println("Data: " + data);
         } catch (ExpiredJwtException e) {

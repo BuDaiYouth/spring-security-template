@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-public class TokenUtil {
+public class TokenUtils {
 
     /**
      * 密钥

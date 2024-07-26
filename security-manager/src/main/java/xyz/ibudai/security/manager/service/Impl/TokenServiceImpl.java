@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import xyz.ibudai.security.common.model.dto.AuthUserDTO;
 import xyz.ibudai.security.common.model.vo.AuthUser;
-import xyz.ibudai.security.common.util.TokenUtil;
+import xyz.ibudai.security.common.util.TokenUtils;
 import xyz.ibudai.security.manager.service.TokenService;
 
 import java.util.Base64;
@@ -33,7 +33,7 @@ public class TokenServiceImpl implements TokenService {
         try {
             // 生成用户 JWT Token
             String key = objectMapper.writeValueAsString(userDTO);
-            String token = TokenUtil.createJWT(key, TimeUnit.MINUTES.toMillis(expireTime));
+            String token = TokenUtils.createJWT(key, TimeUnit.MINUTES.toMillis(expireTime));
             userDTO.setToken(token);
         } catch (Exception e) {
             throw new RuntimeException(e);

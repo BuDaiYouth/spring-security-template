@@ -6,7 +6,7 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-public class AESUtil {
+public class AESUtils {
 
     private final static String ALGORITHM = "AES/CBC/NoPadding";
     private final static String DEFAULT_IV = "1234567890123456";
