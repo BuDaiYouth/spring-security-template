@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 @MapperScan("xyz.ibudai.security.manager.dao")
 @SpringBootApplication(scanBasePackages = {
         "xyz.ibudai.security3",
+        "xyz.ibudai.security.api",
         "xyz.ibudai.security.common",
         "xyz.ibudai.security.manager",
 })
