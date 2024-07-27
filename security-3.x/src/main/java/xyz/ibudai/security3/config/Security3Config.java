@@ -90,6 +90,8 @@ public class Security3Config {
 
     /**
      * 配置忽略的地址
+     * <p>
+     * 通常用于配置静态资源
      */
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
@@ -140,7 +142,7 @@ public class Security3Config {
                     handle.authenticationEntryPoint(authExceptionHandler());
                 })
                 // 设置拦截器
-                .addFilterBefore(requestFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(requestFilter(), UsernamePasswordAuthenticationFilter.class)
                 // 关闭跨站攻击
                 .csrf(AbstractHttpConfigurer::disable)
                 // 允许跨域

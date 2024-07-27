@@ -1,4 +1,4 @@
-package xyz.ibudai.security3.config;
+package xyz.ibudai.security.manager.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;

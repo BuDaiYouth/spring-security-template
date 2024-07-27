@@ -11,13 +11,15 @@ auth:
   # 过滤器配置
   filter:
     enabled: true
-    whitelist: /api/sys/*,/api/auth/whitelist/*,/api/auth/ignored/*
+    whitelist: /api/sys/*,/api/open/**,/api/auth/ignored/*
   security:
     loginUrl: /api/sys/login
+    logoutUrl: /api/sys/logout
+    logoutSuccessUrl: /api/sys/logout/success
     ignoreUrls: /api/auth/ignored/*
-    whitelist: /api/sys/*,/api/auth/whitelist/*
-    userUrls: /api/auth/user/*
-    adminUrls: /api/auth/admin/*
+    whitelist: /api/sys/*,/api/open/**
+    userUrls: /api/user/**
+    adminUrls: /api/admin/**
 
 spring:
   # MySQL 数据库

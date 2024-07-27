@@ -8,19 +8,16 @@ import java.util.Objects;
 public class AESEncoder implements PasswordEncoder {
 
     /**
+     * "str" should use difference key encode,
+     * and backend decrypt then encrypt with diff key
+     *
      * @param charSequence user input password
      */
     @Override
     public String encode(CharSequence charSequence) {
         String str = charSequence.toString();
         try {
-            String plain;
-            if (!Objects.equals(str, "userNotFoundPassword")) {
-                plain = AESUtils.desEncrypt(str);
-            } else {
-                plain = str;
-            }
-            return AESUtils.encrypt(plain);
+            return AESUtils.encrypt(str);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -33,8 +30,7 @@ public class AESEncoder implements PasswordEncoder {
     @Override
     public boolean matches(CharSequence charSequence, String s) {
         try {
-            String plain = AESUtils.desEncrypt(charSequence.toString());
-            String result = AESUtils.encrypt(plain);
+            String result = AESUtils.encrypt(charSequence.toString());
             return Objects.equals(result, s);
         } catch (Exception e) {
             throw new RuntimeException(e);

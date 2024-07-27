@@ -8,16 +8,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    @GetMapping("/user/hello")
-    public String user() {
-        return "User say hello";
-    }
-
-    @GetMapping("/admin/hello")
-    public String admin() {
-        return "Admin say hello";
-    }
-
     @GetMapping("/ignored/hello")
     public String ignored() {
         return "Ignored resource";

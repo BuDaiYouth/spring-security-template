@@ -34,7 +34,7 @@ public class LoginController {
      * 登出
      */
     @PostMapping("logout")
-    public void logout() {
+    public void logout(AuthUser user) {
     }
 
     /**

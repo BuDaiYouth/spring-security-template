@@ -20,16 +20,16 @@ auth:
     # deploy to server need config to "*"
     cors: http://localhost:8080,http://127.0.0.1:8080
   filter:
-    enabled: true
-    whitelist: /api/sys/*,/api/auth/whitelist/*,/api/auth/ignored/*
+    enabled: false
+    whitelist: /api/sys/*,/api/open/**,/api/auth/ignored/*
   security:
     loginUrl: /api/sys/login
     logoutUrl: /api/sys/logout
-    logoutSuccessUrl: /api/sys/logout?success
+    logoutSuccessUrl: /api/sys/logout/success
     ignoreUrls: /api/auth/ignored/*
-    whitelist: /api/sys/**,/api/auth/whitelist/*
-    userUrls: /api/auth/user/*
-    adminUrls: /api/auth/admin/*
+    whitelist: /api/sys/*,/api/open/**
+    userUrls: /api/user/**
+    adminUrls: /api/admin/**
 
 # 绑定 MyBatis
 mybatis:
