@@ -15,7 +15,6 @@ import xyz.ibudai.security.common.model.props.SecurityProps;
 import xyz.ibudai.security.common.encrypt.AESEncoder;
 import xyz.ibudai.security.manager.service.AuthUserService;
 import xyz.ibudai.security2.handler.AuthExceptionHandler;
-import xyz.ibudai.security2.handler.AuthLogoutHandler;
 import xyz.ibudai.security2.handler.LoginFailureHandler;
 import xyz.ibudai.security2.handler.LoginSuccessHandler;
 
@@ -29,25 +28,13 @@ public class Security2Config extends WebSecurityConfigurerAdapter {
     @Autowired
     private AuthUserService authUserService;
 
-    @Bean
-    public LoginSuccessHandler loginSuccessHandler() {
-        return new LoginSuccessHandler();
-    }
+    @Autowired
+    private LoginSuccessHandler loginSuccessHandler;
+    @Autowired
+    private LoginFailureHandler loginFailureHandler;
+    @Autowired
+    private AuthExceptionHandler authExceptionHandler;
 
-    @Bean
-    public LoginFailureHandler loginFailureHandler() {
-        return new LoginFailureHandler();
-    }
-
-    @Bean
-    public AuthLogoutHandler authLogoutHandler() {
-        return new AuthLogoutHandler();
-    }
-
-    @Bean
-    public AuthExceptionHandler authExceptionHandler() {
-        return new AuthExceptionHandler();
-    }
 
     /**
      * 用来将自定义 AuthenticationManager 在工厂中进行暴露
@@ -75,6 +62,8 @@ public class Security2Config extends WebSecurityConfigurerAdapter {
         String[] userResource = this.appendPrefix(securityProps.getUserUrls());
         String[] adminResource = this.appendPrefix(securityProps.getAdminUrls());
         String[] whitelistResource = this.appendPrefix(securityProps.getWhitelist());
+
+        // 认证配置
         http.authorizeRequests()
                 // 为不同权限分配不同资源
                 .antMatchers(userResource).hasAnyRole(SecurityConst.ROLE_USER)
@@ -86,11 +75,11 @@ public class Security2Config extends WebSecurityConfigurerAdapter {
                 // 自定义认证访问资源
                 .and().formLogin().loginProcessingUrl(securityProps.getLoginUrl().trim())
                 // 认证成功逻辑
-                .successHandler(loginSuccessHandler())
+                .successHandler(loginSuccessHandler)
                 // 认证失败逻辑
-                .failureHandler(loginFailureHandler())
+                .failureHandler(loginFailureHandler)
                 // 未认证访问受限资源逻辑
-                .and().exceptionHandling().authenticationEntryPoint(authExceptionHandler())
+                .and().exceptionHandling().authenticationEntryPoint(authExceptionHandler)
                 .and().httpBasic()
                 // 允许跨域
                 .and().cors()

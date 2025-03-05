@@ -1,6 +1,7 @@
 package xyz.ibudai.security2.config;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -16,9 +17,11 @@ public class FilterConfig {
 
     @Value("${server.servlet.context-path}")
     private String contextPath;
-
     @Value("${auth.filter.whitelist}")
     private String excludesApi;
+
+    @Autowired
+    private Security2TokenFilter security2TokenFilter;
 
     @Bean
     public FilterRegistrationBean<Security2TokenFilter> orderFilter1() {
@@ -37,7 +40,7 @@ public class FilterConfig {
         }
         filter.addInitParameter("excludedUris", StringUtils.join(urls, ","));
         filter.setOrder(Ordered.HIGHEST_PRECEDENCE);
-        filter.setFilter(new Security2TokenFilter());
+        filter.setFilter(security2TokenFilter);
         return filter;
     }
 }

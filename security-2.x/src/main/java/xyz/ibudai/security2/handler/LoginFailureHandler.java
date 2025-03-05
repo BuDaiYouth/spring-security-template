@@ -6,6 +6,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.stereotype.Component;
 import xyz.ibudai.security.common.model.ResultData;
 import xyz.ibudai.security.common.model.enums.ContentType;
 import xyz.ibudai.security.common.model.enums.ResStatus;
@@ -15,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+@Component
 public class LoginFailureHandler implements AuthenticationFailureHandler {
 
     @Autowired

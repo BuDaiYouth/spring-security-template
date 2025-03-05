@@ -6,12 +6,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
+import org.springframework.stereotype.Component;
 import xyz.ibudai.security.common.model.ResultData;
 import xyz.ibudai.security.common.model.enums.ContentType;
 import xyz.ibudai.security.common.model.enums.ResStatus;
 
 import java.io.IOException;
 
+@Component
 public class AuthLogoutHandler implements LogoutHandler {
 
     @Autowired

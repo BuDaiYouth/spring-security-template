@@ -39,31 +39,17 @@ public class Security3Config {
     @Autowired
     private AuthUserService authUserService;
 
+    @Autowired
+    private Security3TokenFilter security3TokenFilter;
+    @Autowired
+    private LoginSuccessHandler loginSuccessHandler;
+    @Autowired
+    private LoginFailureHandler loginFailureHandler;
+    @Autowired
+    private AuthLogoutHandler authLogoutHandler ;
+    @Autowired
+    private AuthExceptionHandler authExceptionHandler;
 
-    @Bean
-    public Security3TokenFilter requestFilter() {
-        return new Security3TokenFilter();
-    }
-
-    @Bean
-    public LoginSuccessHandler loginSuccessHandler() {
-        return new LoginSuccessHandler();
-    }
-
-    @Bean
-    public LoginFailureHandler loginFailureHandler() {
-        return new LoginFailureHandler();
-    }
-
-    @Bean
-    public AuthLogoutHandler authLogoutHandler() {
-        return new AuthLogoutHandler();
-    }
-
-    @Bean
-    public AuthExceptionHandler authExceptionHandler() {
-        return new AuthExceptionHandler();
-    }
 
     /**
      * Security 2.x: configure(AuthenticationManagerBuilder auth)
@@ -126,23 +112,23 @@ public class Security3Config {
                 .formLogin(form -> {
                     form.loginProcessingUrl(securityProps.getLoginUrl().trim()).permitAll()
                             // 登录成功处理逻辑
-                            .successHandler(loginSuccessHandler())
+                            .successHandler(loginSuccessHandler)
                             // 登录失败处理逻辑
-                            .failureHandler(loginFailureHandler());
+                            .failureHandler(loginFailureHandler);
                 })
                 // 登出逻辑
                 .logout(it -> {
                     it.logoutUrl(securityProps.getLogoutUrl().trim()).permitAll()
                             .logoutSuccessUrl(securityProps.getLogoutSuccessUrl().trim()).permitAll()
                             // 登出处理器
-                            .addLogoutHandler(authLogoutHandler());
+                            .addLogoutHandler(authLogoutHandler);
                 })
                 // 认证异常处理逻辑
                 .exceptionHandling(handle -> {
-                    handle.authenticationEntryPoint(authExceptionHandler());
+                    handle.authenticationEntryPoint(authExceptionHandler);
                 })
                 // 设置拦截器
-                .addFilterAfter(requestFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(security3TokenFilter, UsernamePasswordAuthenticationFilter.class)
                 // 关闭跨站攻击
                 .csrf(AbstractHttpConfigurer::disable)
                 // 允许跨域
