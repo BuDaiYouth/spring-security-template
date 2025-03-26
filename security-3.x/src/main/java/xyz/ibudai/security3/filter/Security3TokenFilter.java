@@ -8,10 +8,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import xyz.ibudai.security.common.model.ResultData;
@@ -19,9 +19,10 @@ import xyz.ibudai.security.common.model.enums.ContentType;
 import xyz.ibudai.security.common.model.enums.ReqHeader;
 import xyz.ibudai.security.common.model.enums.ResStatus;
 import xyz.ibudai.security.common.model.vo.AuthUser;
+import xyz.ibudai.security.common.props.FilterProps;
 import xyz.ibudai.security.common.util.PathUtils;
 import xyz.ibudai.security.common.util.TokenUtils;
-import xyz.ibudai.security.manager.security.context.SecurityUtils;
+import xyz.ibudai.security.repository.security.context.SecurityUtils;
 
 import java.io.IOException;
 
@@ -30,23 +31,17 @@ import java.io.IOException;
  */
 @Slf4j
 @Component
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class Security3TokenFilter extends OncePerRequestFilter {
 
-    @Value("${auth.filter.enabled}")
-    private boolean enabledFilter;
-    @Value("${server.servlet.context-path}")
-    private String contextPath;
-    @Value("${auth.filter.whitelist}")
-    private String whitelistUrl;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final FilterProps filterProps;
+    private final ObjectMapper objectMapper;
 
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
         String requestURI = request.getRequestURI();
-        if (!enabledFilter || PathUtils.excludesUrl(whitelistUrl, requestURI, contextPath)) {
+        if (!filterProps.getEnabled() || PathUtils.excludesUrl(filterProps.getWhiteList(), requestURI)) {
             // 未开启登录拦截或访问资源免认证
             filterChain.doFilter(request, response);
             return;

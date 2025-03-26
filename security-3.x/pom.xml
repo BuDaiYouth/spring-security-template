@@ -9,10 +9,11 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
+    <groupId>xyz.ibudai</groupId>
     <artifactId>security-3.x</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
 
     <properties>
-        <security-template.version>1.0.0-SNAPSHOT</security-template.version>
         <!-- Tool  -->
         <mybatis-spring.version>3.0.0</mybatis-spring.version>
         <commons-lang3.version>3.12.0</commons-lang3.version>
@@ -38,13 +39,8 @@
 
         <dependency>
             <groupId>xyz.ibudai</groupId>
-            <artifactId>security-common</artifactId>
-            <version>${security-template.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>xyz.ibudai</groupId>
             <artifactId>security-api</artifactId>
-            <version>${security-template.version}</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

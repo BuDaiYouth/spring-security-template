@@ -1,0 +1,24 @@
+# Security auth
+auth:
+  host:
+    cors: http://localhost:8080,http://127.0.0.1:8080
+  # 过滤器配置
+  filter:
+    enabled: true
+    whitelist:
+      - ${server.servlet.context-path}/api/sys/*
+      - ${server.servlet.context-path}/api/open/**
+      - ${server.servlet.context-path}/api/auth/ignored/*
+  security:
+    loginUrl: /api/sys/login
+    logoutUrl: /api/sys/logout
+    logoutSuccessUrl: /api/sys/logout/success
+    ignoreUrls:
+      - ${server.servlet.context-path}/api/auth/ignored/*
+    commonUrls:
+      - ${server.servlet.context-path}/api/sys/*
+      - ${server.servlet.context-path}/api/open/**
+    userUrls:
+      - ${server.servlet.context-path}/api/user/**
+    adminUrls:
+      - ${server.servlet.context-path}/api/admin/**

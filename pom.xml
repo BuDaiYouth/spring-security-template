@@ -10,11 +10,13 @@
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+
+        <spring.version>2.6.13</spring.version>
     </properties>
 
     <modules>
         <module>security-common</module>
-        <module>security-manager</module>
+        <module>security-repository</module>
         <module>security-api</module>
         <module>security-2.x</module>
         <module>security-3.x</module>

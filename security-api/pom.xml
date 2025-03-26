@@ -10,11 +10,6 @@
 
     <artifactId>security-api</artifactId>
 
-    <properties>
-        <spring.version>2.6.13</spring.version>
-        <security-template.version>1.0.0-SNAPSHOT</security-template.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -31,8 +26,8 @@
 
         <dependency>
             <groupId>xyz.ibudai</groupId>
-            <artifactId>security-manager</artifactId>
-            <version>${security-template.version}</version>
+            <artifactId>security-repository</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>

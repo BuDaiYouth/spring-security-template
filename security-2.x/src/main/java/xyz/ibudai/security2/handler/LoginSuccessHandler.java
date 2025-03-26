@@ -1,6 +1,7 @@
 package xyz.ibudai.security2.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -11,8 +12,8 @@ import xyz.ibudai.security.common.model.enums.ContentType;
 import xyz.ibudai.security.common.model.enums.ReqHeader;
 import xyz.ibudai.security.common.model.enums.ResStatus;
 import xyz.ibudai.security.common.model.vo.AuthUser;
-import xyz.ibudai.security.manager.service.Impl.AuthUserServiceImpl;
-import xyz.ibudai.security.manager.service.TokenService;
+import xyz.ibudai.security.repository.service.Impl.AuthUserServiceImpl;
+import xyz.ibudai.security.repository.service.TokenService;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -20,12 +21,12 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Component
+@RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class LoginSuccessHandler implements AuthenticationSuccessHandler {
 
-    @Autowired
-    private ObjectMapper objectMapper;
-    @Autowired
-    private TokenService tokenService;
+    private final ObjectMapper objectMapper;
+    private final TokenService tokenService;
+
 
     /**
      * 认证登录成功处理

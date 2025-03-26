@@ -16,24 +16,13 @@ public class PathUtils {
      *
      * @param path 请求接口
      */
-    public static boolean excludesUrl(String urls, String path, String contextPath) {
+    public static boolean excludesUrl(String[] urls, String path) {
         boolean isMarch = false;
-        try {
-            String[] excludesResource = urls.split(",");
-            if (!StringUtils.isBlank(contextPath) && excludesResource.length > 0) {
-                excludesResource = Arrays.stream(excludesResource)
-                        .map(it -> contextPath + it.trim())
-                        .toArray(String[]::new);
+        for (String pattern : urls) {
+            if (matcher.match(pattern, path)) {
+                isMarch = true;
+                break;
             }
-
-            for (String pattern : excludesResource) {
-                if (matcher.match(pattern, path)) {
-                    isMarch = true;
-                    break;
-                }
-            }
-        } catch (Exception e) {
-            log.error("Verify path failed", e);
         }
         return isMarch;
     }

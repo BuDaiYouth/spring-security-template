@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
@@ -17,10 +18,11 @@ import xyz.ibudai.security.common.model.enums.ResStatus;
 import java.io.IOException;
 
 @Component
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class LoginFailureHandler implements AuthenticationFailureHandler {
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
+
 
     /**
      * 认证登录失败处理

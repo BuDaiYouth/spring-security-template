@@ -1,7 +1,7 @@
 package xyz.ibudai.security3.config;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,8 +16,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import xyz.ibudai.security.common.consts.SecurityConst;
 import xyz.ibudai.security.common.encrypt.AESEncoder;
-import xyz.ibudai.security.common.model.props.SecurityProps;
-import xyz.ibudai.security.manager.service.AuthUserService;
+import xyz.ibudai.security.common.props.SecurityProps;
+import xyz.ibudai.security.repository.service.AuthUserService;
 import xyz.ibudai.security3.filter.Security3TokenFilter;
 import xyz.ibudai.security3.handler.AuthExceptionHandler;
 import xyz.ibudai.security3.handler.AuthLogoutHandler;
@@ -32,23 +32,18 @@ import java.util.Collections;
 @Slf4j
 @Configuration
 @EnableMethodSecurity
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class Security3Config {
 
-    @Autowired
-    private SecurityProps securityProps;
-    @Autowired
-    private AuthUserService authUserService;
+    private final SecurityProps securityProps;
+    private final AuthUserService authUserService;
 
-    @Autowired
-    private Security3TokenFilter security3TokenFilter;
-    @Autowired
-    private LoginSuccessHandler loginSuccessHandler;
-    @Autowired
-    private LoginFailureHandler loginFailureHandler;
-    @Autowired
-    private AuthLogoutHandler authLogoutHandler ;
-    @Autowired
-    private AuthExceptionHandler authExceptionHandler;
+    private final Security3TokenFilter security3TokenFilter;
+
+    private final LoginSuccessHandler loginSuccessHandler;
+    private final LoginFailureHandler loginFailureHandler;
+    private final AuthLogoutHandler authLogoutHandler;
+    private final AuthExceptionHandler authExceptionHandler;
 
 
     /**
@@ -81,8 +76,7 @@ public class Security3Config {
      */
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        String[] ignoredResource = this.appendPrefix(securityProps.getIgnoreUrls());
-        return (web) -> web.ignoring().requestMatchers(ignoredResource);
+        return (web) -> web.ignoring().requestMatchers(securityProps.getIgnoreUrls());
     }
 
     /**
@@ -92,20 +86,16 @@ public class Security3Config {
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        // 解析配置接口名单
-        final String[] userResource = this.appendPrefix(securityProps.getUserUrls());
-        final String[] adminResource = this.appendPrefix(securityProps.getAdminUrls());
-        final String[] whitelistResource = this.appendPrefix(securityProps.getWhitelist());
-
         // 配置 security 作用规则
-        http.authorizeHttpRequests(auth -> {
+        http
+                .authorizeHttpRequests(auth -> {
                     // 为不同权限分配不同资源
-                    auth.requestMatchers(userResource).hasRole(SecurityConst.ROLE_USER)
-                            .requestMatchers(adminResource).hasRole(SecurityConst.ROLE_ADMIN)
-                            // permitAll(): 任意角色都可访问
-                            .requestMatchers(whitelistResource).permitAll()
-                            // 默认无定义资源都需认证
-                            .anyRequest().authenticated();
+                    auth.requestMatchers(securityProps.getUserUrls()).hasRole(SecurityConst.ROLE_USER);
+                    auth.requestMatchers(securityProps.getAdminUrls()).hasRole(SecurityConst.ROLE_ADMIN);
+                    // permitAll(): 任意角色都可访问
+                    auth.requestMatchers(securityProps.getCommonUrls()).permitAll();
+                    // 默认无定义资源都需认证
+                    auth.anyRequest().authenticated();
                 })
                 .httpBasic(Customizer.withDefaults())
                 // 配置登录接口
@@ -134,18 +124,5 @@ public class Security3Config {
                 // 允许跨域
                 .cors(Customizer.withDefaults());
         return http.build();
-    }
-
-    /**
-     * 资源拆分拼接
-     *
-     * @param url 资源路径
-     */
-    private String[] appendPrefix(String url) {
-        if (StringUtils.isBlank(url)) {
-            throw new IllegalArgumentException("Resource can't be blank!");
-        }
-
-        return url.trim().split(",");
     }
 }

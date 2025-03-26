@@ -1,7 +1,7 @@
 package xyz.ibudai.security2.config;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,9 +11,9 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import xyz.ibudai.security.common.consts.SecurityConst;
-import xyz.ibudai.security.common.model.props.SecurityProps;
+import xyz.ibudai.security.common.props.SecurityProps;
 import xyz.ibudai.security.common.encrypt.AESEncoder;
-import xyz.ibudai.security.manager.service.AuthUserService;
+import xyz.ibudai.security.repository.service.AuthUserService;
 import xyz.ibudai.security2.handler.AuthExceptionHandler;
 import xyz.ibudai.security2.handler.LoginFailureHandler;
 import xyz.ibudai.security2.handler.LoginSuccessHandler;
@@ -21,19 +21,15 @@ import xyz.ibudai.security2.handler.LoginSuccessHandler;
 @Slf4j
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class Security2Config extends WebSecurityConfigurerAdapter {
 
-    @Autowired
-    private SecurityProps securityProps;
-    @Autowired
-    private AuthUserService authUserService;
+    private final SecurityProps securityProps;
+    private final AuthUserService authUserService;
 
-    @Autowired
-    private LoginSuccessHandler loginSuccessHandler;
-    @Autowired
-    private LoginFailureHandler loginFailureHandler;
-    @Autowired
-    private AuthExceptionHandler authExceptionHandler;
+    private final LoginSuccessHandler loginSuccessHandler;
+    private final LoginFailureHandler loginFailureHandler;
+    private final AuthExceptionHandler authExceptionHandler;
 
 
     /**
@@ -59,17 +55,13 @@ public class Security2Config extends WebSecurityConfigurerAdapter {
      */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        String[] userResource = this.appendPrefix(securityProps.getUserUrls());
-        String[] adminResource = this.appendPrefix(securityProps.getAdminUrls());
-        String[] whitelistResource = this.appendPrefix(securityProps.getWhitelist());
-
         // 认证配置
         http.authorizeRequests()
                 // 为不同权限分配不同资源
-                .antMatchers(userResource).hasAnyRole(SecurityConst.ROLE_USER)
-                .antMatchers(adminResource).hasAnyRole(SecurityConst.ROLE_ADMIN)
+                .antMatchers(securityProps.getUserUrls()).hasAnyRole(SecurityConst.ROLE_USER)
+                .antMatchers(securityProps.getAdminUrls()).hasAnyRole(SecurityConst.ROLE_ADMIN)
                 // 设置通用资源
-                .antMatchers(whitelistResource).permitAll()
+                .antMatchers(securityProps.getCommonUrls()).permitAll()
                 // 默认无定义资源都需认证
                 .anyRequest().authenticated()
                 // 自定义认证访问资源
@@ -85,18 +77,5 @@ public class Security2Config extends WebSecurityConfigurerAdapter {
                 .and().cors()
                 // 关闭跨站攻击
                 .and().csrf().disable();
-    }
-
-    /**
-     * 资源拆分拼接
-     *
-     * @param url 资源路径
-     */
-    private String[] appendPrefix(String url) {
-        if (StringUtils.isBlank(url)) {
-            throw new IllegalArgumentException("Url resource can't be blank!");
-        }
-
-        return url.trim().split(",");
     }
 }

@@ -1,6 +1,7 @@
 package xyz.ibudai.security2.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
@@ -17,10 +18,11 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Component
+@RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class LoginFailureHandler implements AuthenticationFailureHandler {
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
+
 
     /**
      * 认证登录失败处理

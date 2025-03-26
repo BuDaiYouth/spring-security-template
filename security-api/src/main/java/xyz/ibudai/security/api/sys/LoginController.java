@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import xyz.ibudai.security.common.model.dto.AuthUserDTO;
 import xyz.ibudai.security.common.model.vo.AuthUser;
-import xyz.ibudai.security.manager.service.LoginService;
+import xyz.ibudai.security.repository.service.LoginService;
 
 @RestController
 @RequestMapping("/api/sys")

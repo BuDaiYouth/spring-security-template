@@ -6,14 +6,14 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
-@EnableWebSecurity
 @EnableConfigurationProperties
-@MapperScan("xyz.ibudai.security.manager.dao")
+@EnableWebSecurity(debug = true)
+@MapperScan("xyz.ibudai.security.repository.dao")
 @SpringBootApplication(scanBasePackages = {
         "xyz.ibudai.security2",
         "xyz.ibudai.security.api",
         "xyz.ibudai.security.common",
-        "xyz.ibudai.security.manager",
+        "xyz.ibudai.security.repository",
 })
 public class Security2Application {
 
