@@ -1,20 +1,21 @@
 package xyz.ibudai.security.api.sys;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import xyz.ibudai.security.common.model.dto.AuthUserDTO;
-import xyz.ibudai.security.common.model.vo.AuthUser;
+import xyz.ibudai.security.core.model.dto.AuthUserDTO;
+import xyz.ibudai.security.core.model.vo.AuthUser;
 import xyz.ibudai.security.repository.service.LoginService;
 
 @RestController
 @RequestMapping("/api/sys")
+@RequiredArgsConstructor
 public class LoginController {
 
-    @Autowired
-    private LoginService loginService;
+    private final LoginService loginService;
+
 
     @PostMapping("login")
     public void login(AuthUser user) {

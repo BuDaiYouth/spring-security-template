@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import xyz.ibudai.security.common.model.vo.AuthUser;
+import xyz.ibudai.security.core.model.vo.AuthUser;
 import xyz.ibudai.security.repository.dao.AuthUserDao;
 import xyz.ibudai.security.repository.service.AuthUserService;
 

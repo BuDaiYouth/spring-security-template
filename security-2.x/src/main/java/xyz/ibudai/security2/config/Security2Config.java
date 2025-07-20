@@ -10,9 +10,11 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import xyz.ibudai.security.common.consts.SecurityConst;
-import xyz.ibudai.security.common.props.SecurityProps;
-import xyz.ibudai.security.common.encrypt.AESEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import xyz.ibudai.security.core.encrypt.AESEncoder;
+import xyz.ibudai.security.core.filter.TokenFilter;
+import xyz.ibudai.security.core.model.enums.RoleType;
+import xyz.ibudai.security.core.model.props.SecurityProps;
 import xyz.ibudai.security.repository.service.AuthUserService;
 import xyz.ibudai.security2.handler.AuthExceptionHandler;
 import xyz.ibudai.security2.handler.LoginFailureHandler;
@@ -26,6 +28,8 @@ public class Security2Config extends WebSecurityConfigurerAdapter {
 
     private final SecurityProps securityProps;
     private final AuthUserService authUserService;
+
+    private final TokenFilter tokenFilter;
 
     private final LoginSuccessHandler loginSuccessHandler;
     private final LoginFailureHandler loginFailureHandler;
@@ -58,8 +62,8 @@ public class Security2Config extends WebSecurityConfigurerAdapter {
         // 认证配置
         http.authorizeRequests()
                 // 为不同权限分配不同资源
-                .antMatchers(securityProps.getUserUrls()).hasAnyRole(SecurityConst.ROLE_USER)
-                .antMatchers(securityProps.getAdminUrls()).hasAnyRole(SecurityConst.ROLE_ADMIN)
+                .antMatchers(securityProps.getUserUrls()).hasAnyRole(RoleType.USER.name())
+                .antMatchers(securityProps.getAdminUrls()).hasAnyRole(RoleType.ADMIN.name())
                 // 设置通用资源
                 .antMatchers(securityProps.getCommonUrls()).permitAll()
                 // 默认无定义资源都需认证
@@ -73,8 +77,10 @@ public class Security2Config extends WebSecurityConfigurerAdapter {
                 // 未认证访问受限资源逻辑
                 .and().exceptionHandling().authenticationEntryPoint(authExceptionHandler)
                 .and().httpBasic()
+                // JWT 认证过滤器
+                .and().addFilterAfter(tokenFilter, UsernamePasswordAuthenticationFilter.class)
                 // 允许跨域
-                .and().cors()
+                .cors()
                 // 关闭跨站攻击
                 .and().csrf().disable();
     }

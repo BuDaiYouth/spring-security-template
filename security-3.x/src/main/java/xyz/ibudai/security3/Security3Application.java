@@ -12,7 +12,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 @SpringBootApplication(scanBasePackages = {
         "xyz.ibudai.security3",
         "xyz.ibudai.security.api",
-        "xyz.ibudai.security.common",
+        "xyz.ibudai.security.core",
         "xyz.ibudai.security.repository",
 })
 public class Security3Application {

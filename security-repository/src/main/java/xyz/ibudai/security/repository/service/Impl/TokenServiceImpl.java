@@ -4,12 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import xyz.ibudai.security.common.model.dto.AuthUserDTO;
-import xyz.ibudai.security.common.model.vo.AuthUser;
-import xyz.ibudai.security.common.props.JwtProps;
-import xyz.ibudai.security.common.util.TokenUtils;
+import xyz.ibudai.security.core.model.dto.AuthUserDTO;
+import xyz.ibudai.security.core.model.vo.AuthUser;
+import xyz.ibudai.security.core.model.props.JwtProps;
+import xyz.ibudai.security.core.util.TokenUtils;
 import xyz.ibudai.security.repository.service.TokenService;
 
 import java.util.Base64;

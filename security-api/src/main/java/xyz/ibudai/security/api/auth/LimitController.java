@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/limit")
 public class LimitController {
+
     @GetMapping("/hello")
     public String hello() {
         return "limit resource";

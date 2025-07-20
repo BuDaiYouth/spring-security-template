@@ -14,11 +14,11 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import xyz.ibudai.security.common.consts.SecurityConst;
-import xyz.ibudai.security.common.encrypt.AESEncoder;
-import xyz.ibudai.security.common.props.SecurityProps;
+import xyz.ibudai.security.core.encrypt.AESEncoder;
+import xyz.ibudai.security.core.filter.TokenFilter;
+import xyz.ibudai.security.core.model.props.SecurityProps;
+import xyz.ibudai.security.core.model.enums.RoleType;
 import xyz.ibudai.security.repository.service.AuthUserService;
-import xyz.ibudai.security3.filter.Security3TokenFilter;
 import xyz.ibudai.security3.handler.AuthExceptionHandler;
 import xyz.ibudai.security3.handler.AuthLogoutHandler;
 import xyz.ibudai.security3.handler.LoginFailureHandler;
@@ -38,7 +38,7 @@ public class Security3Config {
     private final SecurityProps securityProps;
     private final AuthUserService authUserService;
 
-    private final Security3TokenFilter security3TokenFilter;
+    private final TokenFilter tokenFilter;
 
     private final LoginSuccessHandler loginSuccessHandler;
     private final LoginFailureHandler loginFailureHandler;
@@ -90,8 +90,8 @@ public class Security3Config {
         http
                 .authorizeHttpRequests(auth -> {
                     // 为不同权限分配不同资源
-                    auth.requestMatchers(securityProps.getUserUrls()).hasRole(SecurityConst.ROLE_USER);
-                    auth.requestMatchers(securityProps.getAdminUrls()).hasRole(SecurityConst.ROLE_ADMIN);
+                    auth.requestMatchers(securityProps.getUserUrls()).hasRole(RoleType.USER.name());
+                    auth.requestMatchers(securityProps.getAdminUrls()).hasRole(RoleType.ADMIN.name());
                     // permitAll(): 任意角色都可访问
                     auth.requestMatchers(securityProps.getCommonUrls()).permitAll();
                     // 默认无定义资源都需认证
@@ -118,7 +118,7 @@ public class Security3Config {
                     handle.authenticationEntryPoint(authExceptionHandler);
                 })
                 // 设置拦截器
-                .addFilterAfter(security3TokenFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(tokenFilter, UsernamePasswordAuthenticationFilter.class)
                 // 关闭跨站攻击
                 .csrf(AbstractHttpConfigurer::disable)
                 // 允许跨域

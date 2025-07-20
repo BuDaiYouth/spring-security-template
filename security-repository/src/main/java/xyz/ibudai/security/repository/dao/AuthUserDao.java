@@ -1,7 +1,6 @@
 package xyz.ibudai.security.repository.dao;
 
-
-import xyz.ibudai.security.common.model.vo.AuthUser;
+import xyz.ibudai.security.core.model.vo.AuthUser;
 
 /**
  * (TbUser)表数据库访问层

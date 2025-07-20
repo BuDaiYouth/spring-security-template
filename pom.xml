@@ -15,7 +15,7 @@
     </properties>
 
     <modules>
-        <module>security-common</module>
+        <module>security-core</module>
         <module>security-repository</module>
         <module>security-api</module>
         <module>security-2.x</module>

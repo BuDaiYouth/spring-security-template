@@ -13,9 +13,6 @@
     <properties>
         <spring.version>2.6.13</spring.version>
 
-        <!-- Tool -->
-        <servlet-api.version>3.1.0</servlet-api.version>
-
         <!-- Database -->
         <mysql.version>8.0.33</mysql.version>
         <mybatis-plus.version>3.5.0</mybatis-plus.version>
@@ -25,7 +22,7 @@
     <dependencies>
         <dependency>
             <groupId>xyz.ibudai</groupId>
-            <artifactId>security-common</artifactId>
+            <artifactId>security-core</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -58,12 +55,6 @@
             <artifactId>mybatis-spring-boot-starter</artifactId>
             <version>${mybatis-spring.version}</version>
             <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>${servlet-api.version}</version>
         </dependency>
     </dependencies>
 </project>

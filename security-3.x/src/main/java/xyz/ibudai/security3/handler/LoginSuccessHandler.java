@@ -9,12 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-import xyz.ibudai.security.common.model.ResultData;
-import xyz.ibudai.security.common.model.dto.AuthUserDTO;
-import xyz.ibudai.security.common.model.enums.ContentType;
-import xyz.ibudai.security.common.model.enums.ReqHeader;
-import xyz.ibudai.security.common.model.enums.ResStatus;
-import xyz.ibudai.security.common.model.vo.AuthUser;
+import xyz.ibudai.security.core.model.ResultData;
+import xyz.ibudai.security.core.model.dto.AuthUserDTO;
+import xyz.ibudai.security.core.model.enums.ContentType;
+import xyz.ibudai.security.core.model.enums.ReqHeader;
+import xyz.ibudai.security.core.model.enums.ResStatus;
+import xyz.ibudai.security.core.model.vo.AuthUser;
 import xyz.ibudai.security.repository.service.Impl.AuthUserServiceImpl;
 import xyz.ibudai.security.repository.service.TokenService;
 

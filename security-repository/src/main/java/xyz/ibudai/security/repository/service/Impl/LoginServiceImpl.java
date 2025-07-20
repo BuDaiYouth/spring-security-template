@@ -6,8 +6,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
-import xyz.ibudai.security.common.model.dto.AuthUserDTO;
-import xyz.ibudai.security.common.model.vo.AuthUser;
+import xyz.ibudai.security.core.model.dto.AuthUserDTO;
+import xyz.ibudai.security.core.model.vo.AuthUser;
 import xyz.ibudai.security.repository.service.LoginService;
 import xyz.ibudai.security.repository.service.TokenService;
 

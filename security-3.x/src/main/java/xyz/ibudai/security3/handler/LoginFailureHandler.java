@@ -11,9 +11,9 @@ import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
-import xyz.ibudai.security.common.model.ResultData;
-import xyz.ibudai.security.common.model.enums.ContentType;
-import xyz.ibudai.security.common.model.enums.ResStatus;
+import xyz.ibudai.security.core.model.ResultData;
+import xyz.ibudai.security.core.model.enums.ContentType;
+import xyz.ibudai.security.core.model.enums.ResStatus;
 
 import java.io.IOException;
 

@@ -1,7 +1,7 @@
 package xyz.ibudai.security.repository.service;
 
-import xyz.ibudai.security.common.model.dto.AuthUserDTO;
-import xyz.ibudai.security.common.model.vo.AuthUser;
+import xyz.ibudai.security.core.model.dto.AuthUserDTO;
+import xyz.ibudai.security.core.model.vo.AuthUser;
 
 public interface TokenService {
 

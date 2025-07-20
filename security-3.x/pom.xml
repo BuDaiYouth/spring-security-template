@@ -39,6 +39,11 @@
 
         <dependency>
             <groupId>xyz.ibudai</groupId>
+            <artifactId>security-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>xyz.ibudai</groupId>
             <artifactId>security-api</artifactId>
             <version>${project.version}</version>
         </dependency>
